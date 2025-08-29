@@ -1,0 +1,9 @@
+# Ignore Visual Studio files
+.vs/
+*.user
+*.suo
+*.vscode/
+
+# Build output
+bin/
+obj/
