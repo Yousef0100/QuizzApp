@@ -9,14 +9,23 @@ namespace Exa_me
     internal class Exam
     {
         private readonly List<Question> questions;
+        private readonly List<ValidationResult> results;
+
         private int curr_ptr;
         private int score;
+        private int totalTimeInSeconds;
+        private int currTimeInSeconds;
 
-        public Exam ()
+
+        public Exam (int totalTimeInSeconds = 180)
         {
             questions = new List<Question> ();
+            results = new List<ValidationResult> ();
             curr_ptr = 0;
             score = 0;
+
+            this.totalTimeInSeconds = totalTimeInSeconds;
+            this.currTimeInSeconds = 0;
         }
 
         public void AddQuestion(Question question)
@@ -29,6 +38,24 @@ namespace Exa_me
             
             if (idx != -1)
                 questions.RemoveAt(idx);
+        }
+
+
+        public void AddValidationResult(ValidationResult result)
+        {
+            results.Add(result);
+        }
+        private void ClearResults()
+        {
+            results.Clear();
+        }
+
+
+        private void CalculateScore()
+        {
+            foreach (ValidationResult res in results) {
+                score += res.finalScore;
+            }
         }
 
 
@@ -46,7 +73,6 @@ namespace Exa_me
 
             return questions[idx];
         }
-
         public int GetQuestionsCount()
         { 
             return questions.Count; 

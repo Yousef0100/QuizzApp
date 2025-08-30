@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
@@ -15,17 +16,26 @@ namespace Exa_me
         public ConsoleColor titleForegroundColor;
         public ConsoleColor titleBackgroundColor;
 
-        public ConsoleColor selectedItemBackgroundColor;
         public ConsoleColor selectedItemForegroundColor;
+        public ConsoleColor selectedItemBackgroundColor;
 
-        public ConsoleColor defaultItemBackgroundColor;
         public ConsoleColor defaultItemForegroundColor;
+        public ConsoleColor defaultItemBackgroundColor;
 
-        public ConsoleColor highlightedItemBackgroundColor;
         public ConsoleColor highlightedItemForegroundColor;
+        public ConsoleColor highlightedItemBackgroundColor;
 
-        public ConsoleColor deactivatedItemBackgroundColor;
         public ConsoleColor deactivatedItemForegroundColor;
+        public ConsoleColor deactivatedItemBackgroundColor;
+
+        public ConsoleColor correctItemForegroundColor;
+        public ConsoleColor correctItemBackgroundColor;
+
+        public ConsoleColor wrongItemForegroundColor;
+        public ConsoleColor wrongItemBackgroundColor;
+
+        public ConsoleColor missingItemForegroundColor;
+        public ConsoleColor missingItemBackgroundColor;
     }
 
     internal class Menu
@@ -34,7 +44,6 @@ namespace Exa_me
 
         protected MenuSettings menuSettings;
         protected readonly List<MenuItem> items;
-        protected readonly List<int> selectedItems;
 
         protected bool showNumbering;
         protected bool deactivated;
@@ -76,7 +85,7 @@ namespace Exa_me
             this.currPtr = 0;
             Id = ID++;
 
-            menuSettings = MenuThemes.myTheme;
+            menuSettings = MenuThemes.myExamTheme;
 
             items = new List<MenuItem>();
 
@@ -117,6 +126,11 @@ namespace Exa_me
             item.AddStateChangedAction(OnMenuItemStateChanged);
             item.AddSelectedAction(OnMenuItemSelected);
         }
+        public List<MenuItem> GetMenuItems()
+        {
+            return items;
+        }
+
 
 
         public void Deactivate()
@@ -131,7 +145,7 @@ namespace Exa_me
             deactivated = false;
             NavigateTo(currPtr);
         }
-        public void AlloSelection(bool on)
+        public void AllowSelection(bool on)
         {
             allowSelection = on;
         }
@@ -199,8 +213,9 @@ namespace Exa_me
                 // printing the item
                 int prefix = i + 1;
                 string itemStr = item.ToString();
-                string s = $"{(showNumbering ? $"    {prefix}. " : "")}{itemStr}";
-                s += new String(' ', 70 - s.Length);
+                //string s = $"{(showNumbering ? $"[ ]  {prefix}. " : "")}{itemStr}";
+                string s = $"{(showNumbering ? $"[{ (item.State.HasFlag(MenuItemState.Selected) ? "✔ " : "  ") }]   " : "")}{itemStr}";
+                s += new String(' ', 80 - s.Length);
                 Console.WriteLine(s);
 
                 Console.ResetColor();
@@ -235,9 +250,14 @@ namespace Exa_me
 
             items[itemIdx].Execute();
         }
-        public virtual void Select ()
+        public virtual void Select()
         {
             Select(currPtr);
+        }
+        public void ClearSelection()
+        {
+            foreach (var item in items)
+                item.RemoveState(MenuItemState.Selected);
         }
 
 
@@ -278,12 +298,16 @@ namespace Exa_me
         }
 
 
-        private void SetConsoleColor(ConsoleColor background, ConsoleColor foreground)
+        public static void SetConsoleColor(ConsoleColor background, ConsoleColor foreground)
         {
             Console.BackgroundColor = background;
             Console.ForegroundColor = foreground;
         }
-        private int CenterCarter(int lineWidth)
+        public static void FlipConsoleColor()
+        {
+            SetConsoleColor(Console.ForegroundColor, Console.BackgroundColor);
+        }
+        public static int CenterCarter(int lineWidth)
         {
             int width = Console.WindowWidth;
             int xPos = (int)(0.5f * (width - lineWidth));

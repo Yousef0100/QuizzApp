@@ -30,6 +30,9 @@ namespace Exa_me
 
         static void Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
+
             Question q1 = new TrueFalseQuestion("Is C# an object-oriented language?", 10, 10);
             // Add valid answers
             q1.AddValidAnswer(0); // true

@@ -47,7 +47,10 @@ namespace Exa_me
         private string _title;
         private int _mark;
         private int _penalty;
+        private int _maxMark;
         private QuestionType _type;
+        private ValidationResult _validationResult;
+
 
         protected readonly Answer correctAnswer;
         protected readonly Answer userAnswer;
@@ -85,6 +88,12 @@ namespace Exa_me
                 _penalty = value;
             }
         }
+        public int MaxMark
+        {
+            get {
+                return correctAnswer.GetCount() * Mark;
+            }
+        }
         public QuestionType Type
         {
             get {
@@ -95,10 +104,28 @@ namespace Exa_me
                 _type = value;
             }
         }
+        public ValidationResult ValidationResult
+        {
+            get {
+                return _validationResult;
+            }
+            protected set {
+                _validationResult = value;
+            }
+        }
 
 
         protected Question ()
         {
+            _validationResult = new ValidationResult
+            {
+                question = this,
+                correctAnswers = new List<int>(),
+                wrongAnswers = new List<int>(),
+                missingAnswers = new List<int>(),
+                finalScore = 0
+            };
+
             correctAnswer = new Answer(this);
             userAnswer = new Answer(this);
 
@@ -119,7 +146,7 @@ namespace Exa_me
 
         public virtual ValidationResult ValidateAnswer()
         {
-            ValidationResult result = new ValidationResult
+            _validationResult = new ValidationResult
             {
                 question = this,
                 correctAnswers = new List<int>(),
@@ -132,14 +159,14 @@ namespace Exa_me
             if (correctAnswer.GetCount() == 0)
             {
                 foreach (var opt in options)
-                    result.wrongAnswers.Add(opt.Id);
+                    _validationResult.wrongAnswers.Add(opt.Id);
 
-                return result;
+                return _validationResult;
             }
 
             // start with all correct answers in missing
             for (int i = 0; i < correctAnswer.GetCount(); i++)
-                result.missingAnswers.Add(correctAnswer.GetAnswerId(i));
+                _validationResult.missingAnswers.Add(correctAnswer.GetAnswerId(i));
 
             // check each user answer against correct answers
             for (int i = 0; i < userAnswer.GetCount(); i++)
@@ -148,29 +175,22 @@ namespace Exa_me
 
                 if (correctAnswer.Contains(usrAnsId))  // user picked a valid correct answer
                 {
-                    result.correctAnswers.Add(usrAnsId);
-                    result.missingAnswers.Remove(usrAnsId);
+                    _validationResult.correctAnswers.Add(usrAnsId);
+                    _validationResult.missingAnswers.Remove(usrAnsId);
                 }
                 else // user picked something not in correct answers
                 {
-                    result.wrongAnswers.Add(usrAnsId);
+                    _validationResult.wrongAnswers.Add(usrAnsId);
                 }
             }
 
-
-            // Assume "Mark" = points per correct answer
-            // Assume "Penalty" = penalty per wrong answer
             int maxScore = correctAnswer.GetCount() * Mark;
+            int gained = _validationResult.correctAnswers.Count * Mark;
+            int lost = _validationResult.wrongAnswers.Count * Penalty;
+            _validationResult.finalScore = gained - lost;
+            _validationResult.finalScore = Math.Max(0, Math.Min(maxScore, _validationResult.finalScore));
 
-            int gained = result.correctAnswers.Count * Mark;
-            int lost = result.wrongAnswers.Count * Penalty;
-
-            result.finalScore = gained - lost;
-
-            // Clamp: score can't go below 0 or above max
-            result.finalScore = Math.Max(0, Math.Min(maxScore, result.finalScore));
-
-            return result;
+            return _validationResult;
         }
 
 
@@ -264,6 +284,12 @@ namespace Exa_me
             ClearUserAnswers();
             ClearValidAnswers();
             options.Clear();
+        }
+
+
+        public int GetCorrectAnswersCount()
+        {
+            return correctAnswer.GetCount();
         }
 
 

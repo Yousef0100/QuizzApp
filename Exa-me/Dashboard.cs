@@ -16,40 +16,46 @@ namespace Exa_me
         private string header = $"To answer a question, write the options you want to choose sperated by a space.\nTo submit a question press the enter / return key";
 
         private List<QuestionMenu> menus;
-        private Menu fixedMenu;
+        private Menu examFixedMenu;
+        private Menu resultsFixedMenu;
         private Menu focusMenu;
 
         private int currPtr;
         private int printCount;
 
+        private Mode mode;
+
         public Dashboard() : this(new Exam())
         {
-
+            
         }
 
         public Dashboard(Exam exam)
         {
             this.exam = exam;
+            this.mode = Mode.Exam;
             this.exit = false;
             this.currPtr = -1;
             this.printCount = 3;
 
             menus = new List<QuestionMenu>();
 
-            fixedMenu = new Menu($"User Dashboard\n{header}", "", false, false, false);
-            //fixedMenu.AddMenuItem("Back", () => { currPtr = Math.Max(-1, ((currPtr % printCount) - 1) * printCount); });
-            //fixedMenu.AddMenuItem("Forward", () => { currPtr = Math.Min(menus.Count - 1, ((currPtr % printCount) + 1) * printCount); });
-            fixedMenu.AddMenuItem("Back", () => { currPtr = Math.Max(-1, currPtr - printCount); ChangeMenuFocus(currPtr); });
-            fixedMenu.AddMenuItem("Forward", () => { currPtr = Math.Min(menus.Count - 1, currPtr + printCount); ChangeMenuFocus(currPtr); });
-            fixedMenu.AddMenuItem("Submit", () => { ValidateExam(); });
+            examFixedMenu = new Menu($"User Dashboard (Exam)\n{header}", "", false, false, false);
+            examFixedMenu.AddMenuItem("Back", () => { currPtr = Math.Max(-1, currPtr - printCount); ChangeMenuFocus(currPtr); });
+            examFixedMenu.AddMenuItem("Forward", () => { currPtr = Math.Min(menus.Count - 1, currPtr + printCount); ChangeMenuFocus(currPtr); });
+            examFixedMenu.AddMenuItem("Submit", () => { ValidateExam(); });
+
+            resultsFixedMenu = new Menu($"User Dashboard (Results)\n{header}", "", false, false, false);
+            resultsFixedMenu.AddMenuItem("Restart", () => {  });
+            resultsFixedMenu.AddMenuItem("", () => { Console.WriteLine("Welcome!"); });
 
 
             int count = exam.GetQuestionsCount();
-            for (int i = 0; i < count; ++i)
-            {
+            for (int i = 0; i < count; ++i) {
                 Question q = exam.GetQuestion(i);
 
                 QuestionMenu menu = new QuestionMenu(i + 1, q);
+                menu.ChangeMode(Mode.Exam);
                 AddMenu(menu);
             }
         }
@@ -68,27 +74,19 @@ namespace Exa_me
         {
             while (!exit)
             {
-                Clear();
-                Console.WriteLine("Keys: (q) => exit ... (r) => restart");
+                if (mode == Mode.Exam)
+                    focusMenu = examFixedMenu;
+                else focusMenu = resultsFixedMenu;
 
-                ConsoleKeyInfo key = Console.ReadKey(intercept: true);
-                if (key.Key == ConsoleKey.Q) {
-                    exit = true;
-                    break;
-                }
-                else if (key.Key == ConsoleKey.R)
-                    currPtr = 0;
-
-                focusMenu = fixedMenu;
-                
                 while (!exit && currPtr < menus.Count)
                 {
-                    int strIdx = (currPtr / printCount);
-
-                    Console.SetCursorPosition(0, 0);
                     Clear();
 
-                    fixedMenu.Display();
+                    if (mode == Mode.Exam)
+                        examFixedMenu.Display();
+                    else resultsFixedMenu.Display();
+
+                        int strIdx = (currPtr / printCount);
                     for (int i = strIdx * printCount; i < strIdx * printCount + printCount && i < menus.Count; ++i)
                         menus[i].Display();
 
@@ -98,6 +96,7 @@ namespace Exa_me
                     {
                         case ConsoleKey.DownArrow:
                             bool navigatedDown = focusMenu.NavigateDown();
+
                             if (!navigatedDown && currPtr <= menus.Count - 2) {
                                 currPtr++;
                                 ChangeMenuFocus(currPtr);
@@ -106,10 +105,11 @@ namespace Exa_me
 
                         case ConsoleKey.UpArrow:
                             bool navigatedUp = focusMenu.NavigateUp();
+
                             if (!navigatedUp) {
                                 if (currPtr == 0) {
                                     currPtr = -1;
-                                    ChangeMenuFocus(fixedMenu);
+                                    ChangeMenuFocus(currPtr);
                                 }
                                 else if (currPtr > 0) {
                                     currPtr--;
@@ -119,19 +119,20 @@ namespace Exa_me
                             break;
 
                         case ConsoleKey.RightArrow:
-                            fixedMenu.Select(1);
+                            examFixedMenu.Select(1);
                             break;
 
                         case ConsoleKey.LeftArrow:
-                            fixedMenu.Select(0);
+                            examFixedMenu.Select(0);
                             break;
 
                         case ConsoleKey.Enter:
-                            focusMenu.Select();
+                            if (mode == Mode.Exam || !(focusMenu is QuestionMenu))
+                                focusMenu.Select();
                             break;
 
                         case ConsoleKey.Q:
-                            exit = true; 
+                            exit = true;
                             break;
 
                         default:
@@ -142,10 +143,7 @@ namespace Exa_me
 
 
             Clear();
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine("Thanks for trying our program");
-            Console.ResetColor();
             Console.ReadKey(intercept: true);
         }
 
@@ -159,7 +157,10 @@ namespace Exa_me
         private void ChangeMenuFocus (int menuIdx)
         {
             if (menuIdx == -1) {
-                ChangeMenuFocus(fixedMenu);
+                if (mode == Mode.Exam) 
+                    ChangeMenuFocus(examFixedMenu);
+                else ChangeMenuFocus(resultsFixedMenu);
+                
                 return;
             }
 
@@ -171,21 +172,19 @@ namespace Exa_me
 
         private void ValidateExam()
         {
-            List<ValidationResult> results = new List<ValidationResult>();
-
-            foreach (QuestionMenu qMenu in menus)
-            {
+            foreach (QuestionMenu qMenu in menus) {
                 ValidationResult result = qMenu.Validate();
-                results.Add(result);
-            }
+                exam.AddValidationResult(result);
 
-            //ShowResults(results);
+                qMenu.ChangeMode(Mode.Results);
+                mode = Mode.Results;
+            }
         }
+
 
         public static void Clear()
         {
-            for (int i = 0; i < Console.BufferHeight; i++)
-            {
+            for (int i = 0; i < Console.BufferHeight; i++) {
                 Console.SetCursorPosition(0, i);
                 Console.Write(new string(' ', Console.BufferWidth));
             }

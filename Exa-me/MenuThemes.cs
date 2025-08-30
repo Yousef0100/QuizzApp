@@ -27,6 +27,15 @@ namespace Exa_me
 
             deactivatedItemForegroundColor = ConsoleColor.DarkGray,
             deactivatedItemBackgroundColor = ConsoleColor.Black,
+
+            correctItemForegroundColor = ConsoleColor.Green,
+            correctItemBackgroundColor = ConsoleColor.Black,
+
+            wrongItemForegroundColor = ConsoleColor.Red,
+            wrongItemBackgroundColor = ConsoleColor.Black,
+
+            missingItemForegroundColor = ConsoleColor.Yellow,
+            missingItemBackgroundColor = ConsoleColor.Black
         };
 
         public static MenuSettings blueTheme = new MenuSettings
@@ -47,7 +56,7 @@ namespace Exa_me
             highlightedItemBackgroundColor = ConsoleColor.DarkBlue,
 
             deactivatedItemForegroundColor = ConsoleColor.Gray,
-            deactivatedItemBackgroundColor = ConsoleColor.DarkBlue,
+            deactivatedItemBackgroundColor = ConsoleColor.DarkBlue
         };
 
         public static MenuSettings lightTheme = new MenuSettings
@@ -134,7 +143,7 @@ namespace Exa_me
             deactivatedItemBackgroundColor = ConsoleColor.Black
         };
 
-        public static MenuSettings myTheme = new MenuSettings
+        public static MenuSettings myExamTheme = new MenuSettings
         {
             headerBackgroundColor = ConsoleColor.Yellow,
             headerForegroundColor = ConsoleColor.Red,
@@ -152,7 +161,46 @@ namespace Exa_me
             highlightedItemForegroundColor = ConsoleColor.Black,
 
             deactivatedItemBackgroundColor = ConsoleColor.Black,
-            deactivatedItemForegroundColor = ConsoleColor.Gray
+            deactivatedItemForegroundColor = ConsoleColor.Gray,
+
+            correctItemBackgroundColor = ConsoleColor.Black,
+            correctItemForegroundColor = ConsoleColor.Green,
+
+            wrongItemBackgroundColor = ConsoleColor.Black,
+            wrongItemForegroundColor = ConsoleColor.Red,
+
+            missingItemBackgroundColor = ConsoleColor.Black,
+            missingItemForegroundColor = ConsoleColor.Yellow
+        };
+
+        public static MenuSettings myResultsTheme = new MenuSettings
+        {
+            headerBackgroundColor = ConsoleColor.Yellow,
+            headerForegroundColor = ConsoleColor.Red,
+
+            titleBackgroundColor = ConsoleColor.Black,
+            titleForegroundColor = ConsoleColor.Yellow,
+
+            selectedItemBackgroundColor = ConsoleColor.Black,
+            selectedItemForegroundColor = ConsoleColor.Green,
+
+            defaultItemBackgroundColor = ConsoleColor.Black,
+            defaultItemForegroundColor = ConsoleColor.White,
+
+            highlightedItemBackgroundColor = ConsoleColor.White,
+            highlightedItemForegroundColor = ConsoleColor.Black,
+
+            deactivatedItemBackgroundColor = ConsoleColor.Black,
+            deactivatedItemForegroundColor = ConsoleColor.Gray,
+
+            correctItemBackgroundColor = ConsoleColor.Black,
+            correctItemForegroundColor = ConsoleColor.Green,
+
+            wrongItemBackgroundColor = ConsoleColor.Black,
+            wrongItemForegroundColor = ConsoleColor.Red,
+
+            missingItemBackgroundColor = ConsoleColor.Black,
+            missingItemForegroundColor = ConsoleColor.Cyan
         };
     }
 }

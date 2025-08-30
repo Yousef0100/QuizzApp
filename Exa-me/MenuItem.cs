@@ -12,7 +12,10 @@ namespace Exa_me
         None        = 0,
         Default     = 1 << 0,       // 1
         Highlighted = 1 << 1,       // 2
-        Selected    = 1 << 2        // 4
+        Selected    = 1 << 2,       // 4
+        Correct     = 1 << 3,       // 8
+        Wrong       = 1 << 4,       // 16
+        Missing     = 1 << 5        // 32
     }
 
     internal class MenuItem
@@ -69,6 +72,17 @@ namespace Exa_me
         {
             selectedAction?.Invoke();
         }
+
+
+        public void AddState(MenuItemState state)
+        {
+            State |= state;
+        }
+        public void RemoveState(MenuItemState state)
+        {
+            State &= ~state;
+        }
+
 
         public void AddStateChangedAction (Action<MenuItemState, MenuItemState> newAction)
         {

@@ -56,6 +56,7 @@
     <Compile Include="Question.cs" />
     <Compile Include="QuestionList.cs" />
     <Compile Include="QuestionMenu.cs" />
+    <Compile Include="ResultDisplayHelper.cs" />
     <Compile Include="SingleChoiceQuestion.cs" />
     <Compile Include="TrueFalseQuestion.cs" />
   </ItemGroup>
